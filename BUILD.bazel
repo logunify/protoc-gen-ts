@@ -18,7 +18,7 @@ gazelle(
 
 pkg_npm(
     name = "package",
-    package_name = "protoc-gen-ts",
+    package_name = "@logunify/protoc-gen-ts",
     srcs = [
         "README.md",
         "index.bzl",
