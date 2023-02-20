@@ -2183,10 +2183,15 @@ function createMessage(
   pbIdentifier: ts.Identifier,
   parentName: string,
 ): ts.ClassDeclaration {
+  const constructor = createConstructor(rootDescriptor, messageDescriptor, pbIdentifier, parentName);
   const statements: ts.ClassElement[] = [
     createOneOfDecls(messageDescriptor),
     // Create constructor
-    createConstructor(rootDescriptor, messageDescriptor, pbIdentifier, parentName),
+    ts.addSyntheticLeadingComment(
+      constructor,
+      ts.SyntaxKind.SingleLineCommentTrivia,
+      `@@protoc_insertion_point(class_scope:${messageDescriptor.name})`
+    ),
   ];
 
   for (const fieldDescriptor of messageDescriptor.field) {
@@ -2240,6 +2245,16 @@ function createMessage(
             ts.factory.createPropertyAccessExpression(
               pbIdentifier,
               ts.factory.createIdentifier("Message"),
+            ),
+            [],
+          ),
+        ]),
+        ts.factory.createHeritageClause(ts.SyntaxKind.ImplementsKeyword, [
+          ts.factory.createExpressionWithTypeArguments(
+            ts.addSyntheticLeadingComment(
+              ts.factory.createIdentifier(""),
+              ts.SyntaxKind.SingleLineCommentTrivia,
+              `@@protoc_insertion_point(class_implements:${messageDescriptor.name})`
             ),
             [],
           ),

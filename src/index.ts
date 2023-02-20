@@ -171,16 +171,34 @@ for (const fileDescriptor of request.proto_file) {
   }
 
   const doNotEditComment = ts.factory.createJSDocComment(comments.join("\n")) as ts.Statement;
+  const additionalImportsInsertionPoint = ts.addSyntheticLeadingComment(
+    ts.factory.createEmptyStatement(),
+    ts.SyntaxKind.SingleLineCommentTrivia,
+    `@@protoc_insertion_point(additional_imports)`
+  );
 
   // Wrap statements within the namespace
   if (fileDescriptor.package && !options.no_namespace) {
     statements = [
       doNotEditComment,
       ...importStatements,
-      descriptor.createNamespace(fileDescriptor.package, statements),
+      ts.addSyntheticLeadingComment(
+        descriptor.createNamespace(fileDescriptor.package, statements),
+        ts.SyntaxKind.SingleLineCommentTrivia,
+        `@@protoc_insertion_point(additional_imports)`
+      ),
     ];
   } else {
-    statements = [doNotEditComment, ...importStatements, ...statements];
+    statements = [
+      doNotEditComment,
+      ...importStatements,
+      ts.addSyntheticLeadingComment(
+        statements[0],
+        ts.SyntaxKind.SingleLineCommentTrivia,
+        `@@protoc_insertion_point(additional_imports)`
+      ),
+      ...statements.slice(1)
+    ];
   }
 
   const sourcefile: ts.SourceFile = ts.factory.createSourceFile(
