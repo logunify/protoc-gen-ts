@@ -1,7 +1,7 @@
 {
   "name": "@logunify/protoc-gen-ts",
   "description": "Compile protocol buffers descriptors to Typescript.",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "license": "MIT",
   "author": {
     "email": "daiyi@logunify.com",

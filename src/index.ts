@@ -28,7 +28,10 @@ function createImport(
 }
 
 function replaceExtension(filename: string, extension: string = ".ts"): string {
-  return filename.replace(/\.[^/.]+$/, extension);
+  if (filename.match(/\.[^/.]+$/)) {
+    return filename.replace(/\.[^/.]+$/, extension);
+  }
+  return `${filename}${extension}`;
 }
 
 
@@ -61,6 +64,10 @@ for (const fileDescriptor of request.proto_file) {
 }
 
 for (const fileDescriptor of request.proto_file) {
+  if (fileDescriptor.name == 'google/protobuf/descriptor.proto') {
+    continue;
+  }
+
   const name = replaceExtension(fileDescriptor.name);
   const pbIdentifier = ts.factory.createUniqueName("pb");
   const grpcIdentifier = ts.factory.createUniqueName("grpc");
@@ -69,19 +76,22 @@ for (const fileDescriptor of request.proto_file) {
   // Will keep track of import statements
   const importStatements: ts.ImportDeclaration[] = [
     // Create all named imports from dependencies
-    ...fileDescriptor.dependency.map((dependency: string) => {
-      const identifier = ts.factory.createUniqueName(`dependency`);
-      const moduleSpecifier = replaceExtension(dependency, "");
-      type.setIdentifierForDependency(dependency, identifier);
+    ...fileDescriptor
+      .dependency
+      .filter((dependency: string) => dependency !== 'google/protobuf/descriptor.proto')
+      .map((dependency: string) => {
+        const identifier = ts.factory.createUniqueName(`dependency`);
+        const moduleSpecifier = replaceExtension(dependency, "");
+        type.setIdentifierForDependency(dependency, identifier);
 
-      return createImport(
-        identifier,
-        `./${path.relative(
-          path.dirname(fileDescriptor.name),
-          moduleSpecifier,
-        )}`,
-      );
-    }),
+        return createImport(
+          identifier,
+          `./${path.relative(
+            path.dirname(fileDescriptor.name),
+            moduleSpecifier,
+          )}`,
+        );
+      }),
   ];
 
   // Create all messages recursively
