@@ -433,7 +433,7 @@ function createToObject(
 
     if (
       field.isOptional(rootDescriptor, fieldDescriptor) ||
-      field.isMessage(fieldDescriptor) ||
+      (field.isMessage(fieldDescriptor) && !field.isMap(fieldDescriptor)) ||
       field.isRequiredWithoutExplicitDefault(rootDescriptor, fieldDescriptor)
     ) {
       const propertyAccessor = ts.factory.createPropertyAccessExpression(
@@ -667,7 +667,7 @@ function createPrimitiveMessageSignature(
         getFieldName(fieldDescriptor),
         (
           field.isOptional(rootDescriptor, fieldDescriptor) ||
-          field.isMessage(fieldDescriptor) ||
+          (field.isMessage(fieldDescriptor) && !field.isMap(fieldDescriptor)) ||
           field.isRequiredWithoutExplicitDefault(rootDescriptor, fieldDescriptor)
         )
           ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
